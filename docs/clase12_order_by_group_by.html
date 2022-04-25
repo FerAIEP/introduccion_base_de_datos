@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>ORDER BY, GROUP BY</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css" integrity="sha512-ITH3NSfntO7uI5n+BnxGNXpzDUoOsmAXuG37UDONLxNYIdc0EBBOOQ1xyc+t9ag9ETSuBXFApx+Rod0uURfDYw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css" integrity="sha512-Mjxkx+r7O/OLQeKeIBCQ2yspG1P5muhAtv/J+p2/aPnSenciZWm5Wlnt+NOUNA4SHbnBIE/R2ic0ZBiCXdQNUg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/solarized.min.css" integrity="sha512-sUF1FAUpi9yPXCDOPsRwzh71zrCVkcT4SfwxBlQeHwMbH1aTGcSdI00GRLaH6iXRSBTazGH/u6sGQTc1tGqofg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/zenburn.min.css" integrity="sha512-JPxjD2t82edI35nXydY/erE9jVPpqxEJ++6nYEoZEpX2TRsmp2FpZuQqZa+wBCen5U16QZOkMadGXHCfp+tUdg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  </head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section data-separator="---" data-markdown data-line-numbers>
+    			<textarea data-template>
+						## [Ordernar y Agrupar resultados](#)
+						---
+						## [ORDER BY](#)
+						---
+						- La comando ORDER BY se utiliza para ordenar el conjunto de resultados en orden ascendente o descendente.
+
+						- La comando ORDER BY ordena los registros en orden ascendente por defecto. Para ordenar los registros en 
+						orden descendente, se adiciona el comando DESC.
+						---
+						## [Ejemplo:](#)
+						```sql
+						CREATE DATABASE videoclub;
+						```
+						```sql
+						CREATE SEQUENCE id_pelicula_seq;
+						```
+						```sql
+						CREATE TABLE peliculas(
+							id_pelicula int DEFAULT nextval('id_pelicula_seq'),
+							titulo varchar(255),
+							genero varchar(255),
+							empresa varchar(255),
+							recaudacion numeric(15,2),
+							estreno int,
+							CONSTRAINT pelicula_pk PRIMARY KEY(id_pelicula)
+						);
+						```
+						```sql
+						ALTER SEQUENCE id_pelicula_seq OWNED BY peliculas.id_pelicula;
+						```
+						---
+						## [SEQUENCE](#)
+						- El comando [SEQUENCE](#) nos permite general un numero de [id_pelicula](#), con el cual no necesitamos 
+						especificar un valor para este campo al crear un nuevo registro.
+						- Cada vez que insertemos un registro a la base de datos se generara un valor automáticamente,
+						que se incrementará de uno en uno en orden ascendente(auto incremental).
+						---
+						```sql
+						INSERT INTO peliculas(titulo, genero, empresa, recaudacion, estreno) VALUES
+						('Music and Lyrics','Romance','Warner Bros.',364741055, 2007),
+						('Monte Carlo', 'Romance', '20th Century Fox', 19832, 2011),
+						('Miss Pettigrew Lives for a Day', 'Comedia', 'Independiente', 2528949, 2008),
+						('Midnight in Paris', 'Romance', 'Sony', 8744705882, 2011),
+						('Marley and Me', 'Comedia', 'Fox', 3746781818, 2008),
+						('Mamma Mia!','Comedia','Universal', 9234453864, 2008),
+						('Made of Honor', 'Comedia', 'Sony', 264906835, 2008),
+						('Love Happens', 'Drama', 'Universal', 2004444444, 2009),
+						('Love & Other Drugs','Comedia', 'Fox', 1817666667, 2010),
+						('Life as We Know It', 'Comedia', 'Independiente', 2530526316, 2010),
+						('License to Wed', 'Comedia', 'Warner Bros.', 19802064, 2007),
+						('Letters to Juliet', 'Comedia', 'Summit', 2639333333, 2010),
+						('Leap Year', 'Comedia', 'Universal', 1715263158, 2010),
+						('Knocked Up', 'Comedia', 'Universal', 6636401848, 2007);
+						```
+						---
+						- Listado de películas ordenadas por estreno en orden [ASCENDENTE](#)(orden por default):
+						```sql
+						SELECT * FROM peliculas ORDER BY estreno;
+						```
+						- Listado de películas ordenadas por estreno en orden [DESCENDENTE](#):
+						```sql
+						SELECT * FROM peliculas ORDER BY estreno DESC;
+						```
+						---
+						## [GROUP BY](#)
+						---
+						- El comando GROUP BY agrupa las filas que tienen los mismos valores.
+
+						- El comando GROUP BY se utiliza generalment con funciones de agregación 
+						(COUNT(), MAX(), MIN(), SUM(), AVG()) para agrupar el conjunto de resultados 
+						por una o más columnas.
+						---
+						## [Ejemplos usando GROUP BY:](#)
+						---
+						- Cantidad de películas por empresa:
+						```sql
+						SELECT 
+							COUNT(id_pelicula) AS "cantidad de peliculas", 
+							empresa 
+						FROM peliculas 
+						GROUP BY empresa;
+						```
+						---
+						- Cantidad de películas por empresa estrenadas a partir del 2008:
+						```sql
+						SELECT 
+							COUNT(id_pelicula) AS "cantidad de peliculas", 
+							empresa 
+						FROM peliculas WHERE estreno >= 2008 
+						GROUP BY empresa;
+						```
+						---
+						- Cantidad de películas por empresa ordenadas por cantidad de manera descendente:
+						```sql
+						SELECT 
+							COUNT(id_pelicula) AS "cantidad de peliculas", 
+							empresa 
+						FROM peliculas 
+						GROUP BY empresa 
+						ORDER BY "cantidad de peliculas" DESC;
+						```
+						---
+						## [Otros ejemplos:](#)
+						- [https://www.postgresqltutorial.com/postgresql-tutorial/postgresql-group-by/](https://www.postgresqltutorial.com/postgresql-tutorial/postgresql-group-by/)
+
+				  </textarea>
+				</section>
+			</div>
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.js" integrity="sha512-fEgazVdZLNymIm9n+b2jtCrM4DQiqNTfLNUxbsGSFUJpYemf9A8GxgJ3VAfU/Lc6yZkDdEOdekBDZtG/mf73fQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.min.js" integrity="sha512-nLsCkPS/rdxRVOkxiKnld9KhQ24V/5kRChzSZ3MoFODykbWyBlQRsHLrbpN3J4LabYBnXIp1EnRIo3ifvyiQIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.min.js" integrity="sha512-QAU7Ux8iEB53koLKFCtddfFp0D1+uQWoX3ROnRDLeiE98XHOkMciaup0Spc014jQAuJaqz8VjUZdBqriheI4Lg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.min.js" integrity="sha512-U3fPDUX5bMrn1wnYqjaK44MFA9E6MKS+zPAg9WPAGF5XhReBeDj3FGaA831CjueG+YJxYA3WaO/m33kMIoOs/A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>

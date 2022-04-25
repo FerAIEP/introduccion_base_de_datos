@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Querys anidadas o Subquerys(subconsulta)</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css" integrity="sha512-ITH3NSfntO7uI5n+BnxGNXpzDUoOsmAXuG37UDONLxNYIdc0EBBOOQ1xyc+t9ag9ETSuBXFApx+Rod0uURfDYw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css" integrity="sha512-Mjxkx+r7O/OLQeKeIBCQ2yspG1P5muhAtv/J+p2/aPnSenciZWm5Wlnt+NOUNA4SHbnBIE/R2ic0ZBiCXdQNUg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/solarized.min.css" integrity="sha512-sUF1FAUpi9yPXCDOPsRwzh71zrCVkcT4SfwxBlQeHwMbH1aTGcSdI00GRLaH6iXRSBTazGH/u6sGQTc1tGqofg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/zenburn.min.css" integrity="sha512-JPxjD2t82edI35nXydY/erE9jVPpqxEJ++6nYEoZEpX2TRsmp2FpZuQqZa+wBCen5U16QZOkMadGXHCfp+tUdg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  </head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section data-separator="---" data-markdown data-line-numbers>
+    			<textarea data-template>
+						## [Querys anidadas o Subquerys(subconsulta)](#)
+						---
+						- Una Subquery en una query que toma otra query como condición.
+						- Pueden ser un poco más dificiles de entender, pero son muy útiles.
+						---
+						## [Ejemplo](#)
+						```sql
+						CREATE DATABASE almacen;
+						```
+						```sql
+						CREATE TABLE items(
+						 item_id int PRIMARY KEY,
+						 description varchar(255),
+						 cost_price numeric(6,2),
+						 sell_price numeric(6,2)
+						);
+						```
+						---
+						```sql
+						CREATE TABLE stocks(
+							stock_id int PRIMARY KEY,
+							item_id int,
+							quantity int,
+							FOREIGN KEY(item_id) REFERENCES items(item_id)
+						);
+						```
+						```sql
+						INSERT INTO items VALUES
+						(1,'Wood Puzzle', 15.23, 21.95),
+						(2,'Rubik Cube', 7.45, 11.49),
+						(5, 'Picture Frame', 7.54, 9.95),
+						(6,'Fan Small', 9.23, 15.75),
+						(7, 'Fan Large', 13.36, 19.95),
+						(11, 'Speakers', 19.73, 25.32);
+
+						INSERT INTO stocks VALUES
+						(1, 1, 12),
+						(2, 7, 8);
+						```
+						---
+
+						- Esta query puede ser mejorada usando una query anidada
+						```sql
+						SELECT * FROM items WHERE item_id IN(
+						  select item_id from items where sell_price <= 16
+						);
+						```
+						---
+						```sql
+						SELECT * FROM items WHERE item_id IN(1,2,3,4,5,6)
+						SELECT * FROM items WHERE item_id IN(SELECT item_id FROM items);
+						```
+						---
+						- Esta query nos trae todos los registros de la tabla items en donde la description comienza con 'F'
+						```sql
+						SELECT * FROM items WHERE item_id IN(
+						SELECT item_id FROM items WHERE description LIKE 'F%'
+						);
+						```
+						---
+						- Esta query nos trae todos los registros de la tabla items en donde el precio de venta es mayor a 15
+						```sql
+						SELECT * FROM items WHERE item_id IN(
+						SELECT item_id FROM items WHERE sell_price >= 15
+						);
+						```
+						---
+						```sql
+						SELECT AVG(cost_price) FROM items;
+
+						SELECT * FROM items
+						WHERE cost_price > cast((SELECT AVG(cost_price) FROM items) AS numeric(6,2));
+						```
+						---
+						```sql
+						SELECT s.item_id, s.quantity FROM stocks s, items i
+						WHERE i.cost_price > cast(10.0 AS numeric(7,2))
+						AND s.item_id = i.item_id;
+						```
+						```sql
+						SELECT * FROM stocks WHERE item_id IN
+						(SELECT item_id FROM items
+						WHERE cost_price > cast(10.0 AS numeric(7,2)));
+						```
+						---
+						## [Ejemplos](#)
+						- [Subquery](https://www.postgresqltutorial.com/postgresql-tutorial/postgresql-subquery/)
+				  </textarea>
+				</section>
+			</div>
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.js" integrity="sha512-fEgazVdZLNymIm9n+b2jtCrM4DQiqNTfLNUxbsGSFUJpYemf9A8GxgJ3VAfU/Lc6yZkDdEOdekBDZtG/mf73fQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.min.js" integrity="sha512-nLsCkPS/rdxRVOkxiKnld9KhQ24V/5kRChzSZ3MoFODykbWyBlQRsHLrbpN3J4LabYBnXIp1EnRIo3ifvyiQIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.min.js" integrity="sha512-QAU7Ux8iEB53koLKFCtddfFp0D1+uQWoX3ROnRDLeiE98XHOkMciaup0Spc014jQAuJaqz8VjUZdBqriheI4Lg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.min.js" integrity="sha512-U3fPDUX5bMrn1wnYqjaK44MFA9E6MKS+zPAg9WPAGF5XhReBeDj3FGaA831CjueG+YJxYA3WaO/m33kMIoOs/A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>

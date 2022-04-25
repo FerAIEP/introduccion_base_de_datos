@@ -1,0 +1,160 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>SQL Join</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css" integrity="sha512-ITH3NSfntO7uI5n+BnxGNXpzDUoOsmAXuG37UDONLxNYIdc0EBBOOQ1xyc+t9ag9ETSuBXFApx+Rod0uURfDYw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css" integrity="sha512-Mjxkx+r7O/OLQeKeIBCQ2yspG1P5muhAtv/J+p2/aPnSenciZWm5Wlnt+NOUNA4SHbnBIE/R2ic0ZBiCXdQNUg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/solarized.min.css" integrity="sha512-sUF1FAUpi9yPXCDOPsRwzh71zrCVkcT4SfwxBlQeHwMbH1aTGcSdI00GRLaH6iXRSBTazGH/u6sGQTc1tGqofg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/zenburn.min.css" integrity="sha512-JPxjD2t82edI35nXydY/erE9jVPpqxEJ++6nYEoZEpX2TRsmp2FpZuQqZa+wBCen5U16QZOkMadGXHCfp+tUdg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  </head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section data-separator="---" data-markdown data-line-numbers>
+    			<textarea data-template>
+## [Querys con múltiples tablas](#)
+---
+## [JOIN](#)
+- Los JOINs en SQL sirven para combinar filas de dos o más tablas.
+- Para hacer un JOIN entre tabla debe existir un campo en común.
+---
+## [Ejemplo](#)
+
+```sql
+CREATE DATABASE blog;
+```
+```sql
+CREATE TABLE articulos(
+  id_articulo integer,
+  titulo varchar(255),
+  descripcion text,
+  PRIMARY KEY(id_articulo)
+);
+```
+---
+```sql
+CREATE TABLE comentarios(
+  id_comentario integer,
+  autor varchar(255),
+  comentario varchar(255),
+  id_articulo integer,
+  PRIMARY KEY(id_comentario),
+  FOREIGN KEY(id_articulo) REFERENCES articulos(id_articulo)
+);
+```
+---
+```sql
+INSERT INTO articulos VALUES
+(1,'The Smiling Ghost','Toxic effect of venom of tarantula accidental sequela'),
+(2,'Morgen','Toxoplasma oculopathy unspecified'),
+(3,'Pokrajina St.2','Contusion of unsp external genital organ male subs encntr'),
+(4,'Duellists, The','Oth aplastic anemias and other bone marrow failure syndromes'),
+(5,'Being John Malkovich','Person outside special agri vehicle injured in traf subs'),
+(6,'House of the Dead', 'The Superficial foreign body of other finger sequela'),
+(7,'Late George Apley', 'The Occup of pk-up/van inj in clsn w 2/3-whl mv nontraf subs'),
+(8,'Tank','Burn of third degree of knee'),
+(9,'3 Needles','Adult pulmonary Langerhans cell histiocytosis'),
+(10,'Chain of Command','Bilateral femoral hernia with obstruction without gangrene');
+```
+---
+```sql
+INSERT INTO comentarios VALUES
+(1, 'Holden', 'Sltr-haris Type IV physl fx lower end ulna left arm sqla', 2),
+(2, 'Sarette', 'Displ spiral fx shaft of r fibula 7thN', 2),
+(3, 'Sinclare', 'Benign neoplasm of unspecified ureter', 5),
+(4, 'Kelley', 'Laceration of popliteal artery right leg subs encntr', 8),
+(5, 'Vince', 'Car passenger injured in clsn w nonmtr vehicle nontraf init', 8),
+(6, 'Fee', 'Displacement of intrauterine contraceptive device init', 4),
+(7, 'Marlo', 'Anterior synechiae iris', 4),
+(8, 'Mag', 'Asphyx due to being trapped in a car trunk undetermined', 4),
+(9, 'Iolande', 'Toxic effect of sulfur dioxide', 9),
+(10, 'Ilyse', 'Hemoglobinuria', null);
+```
+---
+## [(INNER) JOIN:](#)
+Me trae todos los resultados que son comunes a dos tablas ([A](#) y [B](#)).
+
+<img class="fragment" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/SQL_Join_-_07_A_Inner_Join_B.svg/1200px-SQL_Join_-_07_A_Inner_Join_B.svg.png" width="400" height="250">
+---
+- Seleccionamos todos los registros de la tabla [articulos(A)](#) y la tabla [comentarios(B)](#)
+
+```sql
+SELECT * FROM articulos
+INNER JOIN comentarios ON articulos.id_articulo = comentarios.id_articulo;
+```
+---
+- Idem a la query anterior, pero seleccionando algunos campos
+```sql
+SELECT
+articulos.titulo,
+comentarios.autor,
+comentarios.comentario
+FROM articulos
+JOIN comentarios ON articulos.id_articulo = comentarios.id_articulo;
+```
+---
+## [LEFT JOIN:]()
+Me trae todos los resultados que tienen una referencia en común entre [A](#) y [B](#), más todos los registros de [A](#).
+
+
+<img class="fragment" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/SQL_Join_-_01_A_Left_Join_B.svg/1200px-SQL_Join_-_01_A_Left_Join_B.svg.png" width="400" height="250">
+---
+
+- Seleccionamos todos los registros de la tabla [articulos(A)](#), más los registros que tienen una
+referencia común en la tabla [articulos(A)](#) y la tabla [comentarios(B)](#)
+
+```sql
+SELECT a.titulo, c.autor, c.comentario FROM articulos a
+LEFT JOIN comentarios c ON a.id_articulo = c.id_articulo;
+```
+---
+## [RIGHT JOIN:](#)
+- Me trae todos los resultados que tienen una referencia en común entre [A](#) y [B](#) más todos los resultados que están en [B](#).
+
+<img class="fragment" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/SQL_Join_-_03_A_Right_Join_B.svg/1200px-SQL_Join_-_03_A_Right_Join_B.svg.png" width="400" height="250">
+
+---
+
+- Seleccionamos todos los registros de la tabla [articulos(B)](#), más los registros que tienen una
+referencia común en la tabla [articulos(A)](#) y la tabla [comentarios(B)](#)
+```sql
+  SELECT
+    a.titulo,
+    c.autor,
+    c.comentario
+    FROM articulos a
+  RIGHT JOIN comentarios c ON a.id_articulo = c.id_articulo;
+```
+---
+
+## [Ejemplos](#)
+
+- [https://www.postgresqltutorial.com/postgresql-tutorial/postgresql-joins/](https://www.postgresqltutorial.com/postgresql-tutorial/postgresql-joins/)
+
+				  </textarea>
+				</section>
+			</div>
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.js" integrity="sha512-fEgazVdZLNymIm9n+b2jtCrM4DQiqNTfLNUxbsGSFUJpYemf9A8GxgJ3VAfU/Lc6yZkDdEOdekBDZtG/mf73fQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/notes/notes.min.js" integrity="sha512-nLsCkPS/rdxRVOkxiKnld9KhQ24V/5kRChzSZ3MoFODykbWyBlQRsHLrbpN3J4LabYBnXIp1EnRIo3ifvyiQIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/markdown/markdown.min.js" integrity="sha512-QAU7Ux8iEB53koLKFCtddfFp0D1+uQWoX3ROnRDLeiE98XHOkMciaup0Spc014jQAuJaqz8VjUZdBqriheI4Lg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/plugin/highlight/highlight.min.js" integrity="sha512-U3fPDUX5bMrn1wnYqjaK44MFA9E6MKS+zPAg9WPAGF5XhReBeDj3FGaA831CjueG+YJxYA3WaO/m33kMIoOs/A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>
